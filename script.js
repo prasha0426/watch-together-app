@@ -79,21 +79,26 @@ async function startVideoCall() {
     socket.emit("peer-id", { roomId, peerId: id });
   });
 
-  peer.on("call", (call) => {
-    call.answer(myStream);
-    call.on("stream", (stream) => {
-      document.getElementById("partnerVideo").srcObject = stream;
+  // 🔥 CALL EXISTING USERS
+  socket.on("all-users", (users) => {
+    users.forEach(userId => {
+      const call = peer.call(userId, myStream);
+
+      call.on("stream", (stream) => {
+        document.getElementById("partnerVideo").srcObject = stream;
+      });
     });
   });
 
-  socket.on("peer-id", (peerId) => {
-    const call = peer.call(peerId, myStream);
+  // 🔥 RECEIVE CALL
+  peer.on("call", (call) => {
+    call.answer(myStream);
+
     call.on("stream", (stream) => {
       document.getElementById("partnerVideo").srcObject = stream;
     });
   });
 }
-
 // CONTROLS
 function toggleMic() {
   const track = myStream.getAudioTracks()[0];
