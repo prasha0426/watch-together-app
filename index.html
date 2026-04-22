@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Watch Together</title>
+</head>
+<body>
+
+<h2>Room</h2>
+<input id="roomInput" placeholder="Enter Room ID" />
+<button onclick="joinRoom()">Join</button>
+
+<hr>
+
+<video id="video" controls width="500"></video>
+<input type="file" id="fileInput" />
+
+<hr>
+
+<div>
+  <input id="messageInput" placeholder="Type message..." />
+  <button onclick="sendMessage()">Send</button>
+</div>
+
+<ul id="chat"></ul>
+
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
