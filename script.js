@@ -79,10 +79,12 @@ async function startVideoCall() {
     socket.emit("peer-id", { roomId, peerId: id });
   });
 
-  // 🔥 CALL EXISTING USERS
-  socket.on("all-users", (users) => {
-    users.forEach(userId => {
-      const call = peer.call(userId, myStream);
+  // ✅ CALL EVERYONE
+  socket.on("all-peer-ids", (peerIds) => {
+    peerIds.forEach((id) => {
+      if (id === peer.id) return; // skip self
+
+      const call = peer.call(id, myStream);
 
       call.on("stream", (stream) => {
         document.getElementById("partnerVideo").srcObject = stream;
@@ -90,7 +92,7 @@ async function startVideoCall() {
     });
   });
 
-  // 🔥 RECEIVE CALL
+  // ✅ RECEIVE CALL
   peer.on("call", (call) => {
     call.answer(myStream);
 
