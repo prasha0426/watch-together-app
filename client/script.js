@@ -1,4 +1,4 @@
-const socket = io("https://watch-together-backend.onrender.com");
+const socket = io("https://watch-together-backend-edll.onrender.com");
 
 let roomId = "";
 const video = document.getElementById("video");
