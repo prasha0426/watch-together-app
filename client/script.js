@@ -1,4 +1,4 @@
-const socket = io("http://localhost:5000");
+const socket = io("https://watch-together-backend.onrender.com");
 
 let roomId = "";
 const video = document.getElementById("video");
