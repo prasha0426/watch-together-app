@@ -41,10 +41,16 @@ socket.on("seek", (time) => {
 
 // Chat
 function sendMessage() {
-  const msg = document.getElementById("messageInput").value;
+  const input = document.getElementById("messageInput");
+  const msg = input.value;
+
+  if (msg.trim() === "") return; // prevent empty messages
+
   socket.emit("chat-message", { roomId, message: msg });
 
   addMessage("You: " + msg);
+
+  input.value = ""; // 🔥 clears the box
 }
 
 socket.on("chat-message", (msg) => {
