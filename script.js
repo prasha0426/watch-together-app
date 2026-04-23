@@ -162,7 +162,15 @@ function loadYouTube() {
 
   socket.emit("youtube-load", { roomId, videoId });
 }
+function backToLocal() {
+  isYouTube = false;
 
+  document.getElementById("youtubePlayer").style.display = "none";
+  document.getElementById("video").style.display = "block";
+  document.getElementById("fileInput").style.display = "block";
+
+  if (player) player.destroy();
+}
 function createPlayer(videoId) {
   if (player) player.destroy();
 
