@@ -19,7 +19,18 @@
 <body class="bg-[#0F172A] text-white">
 
 <div class="flex flex-col md:flex-row h-screen">
+<div class="mb-3">
+  <input id="youtubeLink" placeholder="Paste YouTube link..."
+    class="w-full p-2 bg-gray-800 rounded-lg mb-2" />
 
+  <button onclick="loadYouTube()"
+    class="bg-red-500 px-4 py-1 rounded-lg">
+    Load YouTube ▶️
+  </button>
+</div>
+
+<div id="youtubePlayer"
+  class="w-full aspect-video rounded-xl overflow-hidden mb-3"></div>
   <!-- 🎬 VIDEO -->
   <div class="md:w-2/3 w-full p-4 flex flex-col">
 
@@ -78,6 +89,7 @@
 
 <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
 <script src="script.js"></script>
 
 </body>
