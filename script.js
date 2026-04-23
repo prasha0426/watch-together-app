@@ -1,5 +1,9 @@
 const socket = io("https://watch-together-backend-edll.onrender.com");
+let ytReady = false;
 
+function onYouTubeIframeAPIReady() {
+  ytReady = true;
+}
 let roomId = "";
 const video = document.getElementById("video");
 
@@ -136,12 +140,24 @@ function extractVideoId(url) {
 }
 
 function loadYouTube() {
+  if (!ytReady) {
+    alert("YouTube not ready yet, try again in 2 sec");
+    return;
+  }
+
   const url = document.getElementById("youtubeLink").value;
   const videoId = extractVideoId(url);
 
   if (!videoId) return alert("Invalid link");
 
   isYouTube = true;
+
+  // 🔥 HIDE LOCAL VIDEO
+  document.getElementById("video").style.display = "none";
+
+  // 🔥 SHOW YOUTUBE PLAYER
+  document.getElementById("youtubePlayer").style.display = "block";
+
   createPlayer(videoId);
 
   socket.emit("youtube-load", { roomId, videoId });
