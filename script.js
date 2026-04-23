@@ -19,6 +19,44 @@ function joinRoom() {
   socket.emit("join-room", roomId);
   startVideoCall();
 }
+function leaveRoom() {
+  // 🔴 Stop camera + mic
+  if (myStream) {
+    myStream.getTracks().forEach(track => track.stop());
+  }
+
+  // 🔴 Destroy peer connection
+  if (peer) {
+    peer.destroy();
+    peer = null;
+  }
+
+  // 🔴 Tell server
+  socket.emit("leave-room");
+
+  // 🔴 Reset UI
+  document.getElementById("partnerVideo").srcObject = null;
+  document.getElementById("myVideo").srcObject = null;
+
+  document.getElementById("chat").innerHTML = "";
+
+  // 🔴 Reset videos
+  video.pause();
+  video.src = "";
+
+  if (player) {
+    player.destroy();
+    player = null;
+  }
+
+  document.getElementById("youtubePlayer").style.display = "none";
+  document.getElementById("video").style.display = "block";
+  document.getElementById("fileInput").style.display = "block";
+
+  roomId = "";
+
+  alert("You left the room");
+}
 
 // VIDEO LOAD
 document.getElementById("fileInput").addEventListener("change", function () {
