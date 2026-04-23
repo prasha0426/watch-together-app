@@ -186,6 +186,11 @@ function createPlayer(videoId) {
 
 socket.on("youtube-load", (videoId) => {
   isYouTube = true;
+
+  document.getElementById("video").style.display = "none";
+  document.getElementById("youtubePlayer").style.display = "block";
+  document.getElementById("fileInput").style.display = "none";
+
   createPlayer(videoId);
 });
 
