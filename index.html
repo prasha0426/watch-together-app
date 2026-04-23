@@ -17,24 +17,9 @@
 </head>
 
 <body class="bg-[#0F172A] text-white">
-<div class="mb-3 bg-[#1E293B] p-3 rounded-xl flex gap-2 items-center">
 
-  <input id="youtubeLink"
-    placeholder="Paste YouTube link..."
-    class="flex-1 p-2 bg-gray-800 rounded-lg outline-none" />
 
-  <button onclick="loadYouTube()"
-    class="bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600">
-    ▶
-  </button>
 
-</div>
-
-<!-- YouTube Player -->
-<div id="youtubePlayer"
-  style="display:none;"
-  class="w-full aspect-video rounded-xl overflow-hidden mb-3">
-</div>
   <!-- 🎬 VIDEO -->
   <div class="md:w-2/3 w-full p-4 flex flex-col">
 
@@ -53,10 +38,6 @@
     <p id="syncStatus" class="text-green-400 mt-2">In Sync ✅</p>
 
   </div>
-  <button onclick="backToLocal()"
-  class="bg-gray-700 px-3 py-1 rounded-lg mb-3">
-  ← Back to Local Video
-</button>
 
   <!-- 💬 SIDE -->
   <div class="md:w-1/3 w-full bg-[#1E293B] p-4 flex flex-col">
