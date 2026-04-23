@@ -80,17 +80,24 @@ async function startVideoCall() {
   });
 
   // ✅ CALL EVERYONE
-  socket.on("all-peer-ids", (peerIds) => {
-    peerIds.forEach((id) => {
-      if (id === peer.id) return; // skip self
+socket.on("all-peer-ids", (peerIds) => {
+  peerIds.forEach((id) => {
+    if (id === peer.id) return;
 
-      const call = peer.call(id, myStream);
+    console.log("Calling peer:", id);
 
-      call.on("stream", (stream) => {
-        document.getElementById("partnerVideo").srcObject = stream;
-      });
+    const call = peer.call(id, myStream);
+
+    call.on("stream", (stream) => {
+      console.log("Received stream");
+      document.getElementById("partnerVideo").srcObject = stream;
+    });
+
+    call.on("error", (err) => {
+      console.log("Call error:", err);
     });
   });
+});
 
   // ✅ RECEIVE CALL
   peer.on("call", (call) => {
