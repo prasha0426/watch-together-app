@@ -144,7 +144,7 @@ function loadYouTube() {
     alert("YouTube not ready yet, try again in 2 sec");
     return;
   }
-
+  document.getElementById("fileInput").style.display = "none";
   const url = document.getElementById("youtubeLink").value;
   const videoId = extractVideoId(url);
 
