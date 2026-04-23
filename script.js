@@ -7,6 +7,10 @@ const video = document.getElementById("video");
 let peer;
 let myStream;
 
+// 🎬 YouTube
+let player;
+let isYouTube = false;
+
 // JOIN
 function joinRoom() {
   roomId = document.getElementById("roomInput").value;
@@ -20,21 +24,30 @@ function joinRoom() {
 document.getElementById("fileInput").addEventListener("change", function () {
   const file = this.files[0];
   video.src = URL.createObjectURL(file);
+  isYouTube = false;
 });
 
-// SYNC
-video.onplay = () => socket.emit("play", { roomId, time: video.currentTime });
-video.onpause = () => socket.emit("pause", roomId);
-video.onseeked = () => socket.emit("seek", { roomId, time: video.currentTime });
+// SYNC LOCAL VIDEO
+video.onplay = () => {
+  if (!isYouTube) socket.emit("play", { roomId, time: video.currentTime });
+};
+video.onpause = () => {
+  if (!isYouTube) socket.emit("pause", roomId);
+};
+video.onseeked = () => {
+  if (!isYouTube) socket.emit("seek", { roomId, time: video.currentTime });
+};
 
 socket.on("play", (time) => {
-  video.currentTime = time;
-  video.play();
+  if (!isYouTube) {
+    video.currentTime = time;
+    video.play();
+  }
 });
-socket.on("pause", () => video.pause());
-socket.on("seek", (time) => video.currentTime = time);
+socket.on("pause", () => !isYouTube && video.pause());
+socket.on("seek", (time) => !isYouTube && (video.currentTime = time));
 
-// CHAT
+// 💬 CHAT
 function sendMessage() {
   const input = document.getElementById("messageInput");
   const msg = input.value;
@@ -64,13 +77,13 @@ document.getElementById("messageInput").addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendMessage();
 });
 
-// 🎥 VIDEO CALL
+// 🎥 VIDEO CALL (FIXED)
 async function startVideoCall() {
   peer = new Peer();
 
   myStream = await navigator.mediaDevices.getUserMedia({
     video: true,
-    audio: true
+    audio: true,
   });
 
   document.getElementById("myVideo").srcObject = myStream;
@@ -79,36 +92,32 @@ async function startVideoCall() {
     socket.emit("peer-id", { roomId, peerId: id });
   });
 
-  // ✅ CALL EVERYONE
-socket.on("all-peer-ids", (peerIds) => {
-  peerIds.forEach((id) => {
-    if (id === peer.id) return;
+  socket.on("all-peer-ids", (peerIds) => {
+    peerIds.forEach((id) => {
+      if (id === peer.id) return;
 
-    console.log("Calling peer:", id);
+      const call = peer.call(id, myStream);
 
-    const call = peer.call(id, myStream);
-
-    call.on("stream", (stream) => {
-      console.log("Received stream");
-      document.getElementById("partnerVideo").srcObject = stream;
-    });
-
-    call.on("error", (err) => {
-      console.log("Call error:", err);
+      call.on("stream", (stream) => {
+        const vid = document.getElementById("partnerVideo");
+        vid.srcObject = stream;
+        vid.play().catch(() => {});
+      });
     });
   });
-});
 
-  // ✅ RECEIVE CALL
   peer.on("call", (call) => {
     call.answer(myStream);
 
     call.on("stream", (stream) => {
-      document.getElementById("partnerVideo").srcObject = stream;
+      const vid = document.getElementById("partnerVideo");
+      vid.srcObject = stream;
+      vid.play().catch(() => {});
     });
   });
 }
-// CONTROLS
+
+// 🎤 CONTROLS
 function toggleMic() {
   const track = myStream.getAudioTracks()[0];
   track.enabled = !track.enabled;
@@ -118,3 +127,57 @@ function toggleCamera() {
   const track = myStream.getVideoTracks()[0];
   track.enabled = !track.enabled;
 }
+
+// 🎬 YOUTUBE FEATURE
+function extractVideoId(url) {
+  const regExp = /(?:youtube\.com\/.*v=|youtu\.be\/)([^&]+)/;
+  const match = url.match(regExp);
+  return match ? match[1] : null;
+}
+
+function loadYouTube() {
+  const url = document.getElementById("youtubeLink").value;
+  const videoId = extractVideoId(url);
+
+  if (!videoId) return alert("Invalid link");
+
+  isYouTube = true;
+  createPlayer(videoId);
+
+  socket.emit("youtube-load", { roomId, videoId });
+}
+
+function createPlayer(videoId) {
+  if (player) player.destroy();
+
+  player = new YT.Player("youtubePlayer", {
+    videoId: videoId,
+    events: {
+      onStateChange: (event) => {
+        const time = player.getCurrentTime();
+
+        if (event.data === YT.PlayerState.PLAYING) {
+          socket.emit("youtube-play", { roomId, time });
+        }
+
+        if (event.data === YT.PlayerState.PAUSED) {
+          socket.emit("youtube-pause", roomId);
+        }
+      },
+    },
+  });
+}
+
+socket.on("youtube-load", (videoId) => {
+  isYouTube = true;
+  createPlayer(videoId);
+});
+
+socket.on("youtube-play", (time) => {
+  player.seekTo(time);
+  player.playVideo();
+});
+
+socket.on("youtube-pause", () => {
+  player.pauseVideo();
+});
