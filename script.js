@@ -1,5 +1,5 @@
 const socket = io("https://watch-together-backend-edll.onrender.com");
-
+let isSyncing = false;
 let roomId = "";
 const video = document.getElementById("video");
 
@@ -67,24 +67,58 @@ document.getElementById("fileInput").addEventListener("change", function () {
 
 // SYNC LOCAL VIDEO
 video.onplay = () => {
-  if (!isYouTube) socket.emit("play", { roomId, time: video.currentTime });
+  if (isYouTube || isSyncing) return;
+
+  socket.emit("play", { roomId, time: video.currentTime });
 };
+
 video.onpause = () => {
-  if (!isYouTube) socket.emit("pause", roomId);
+  if (isYouTube || isSyncing) return;
+
+  socket.emit("pause", roomId);
 };
+
 video.onseeked = () => {
-  if (!isYouTube) socket.emit("seek", { roomId, time: video.currentTime });
+  if (isYouTube || isSyncing) return;
+
+  socket.emit("seek", { roomId, time: video.currentTime });
 };
-
 socket.on("play", (time) => {
-  if (!isYouTube) {
-    video.currentTime = time;
-    video.play();
-  }
-});
-socket.on("pause", () => !isYouTube && video.pause());
-socket.on("seek", (time) => !isYouTube && (video.currentTime = time));
+  if (isYouTube) return;
 
+  isSyncing = true;
+
+  video.currentTime = time;
+  video.play();
+
+  setTimeout(() => {
+    isSyncing = false;
+  }, 500);
+});
+
+socket.on("pause", () => {
+  if (isYouTube) return;
+
+  isSyncing = true;
+
+  video.pause();
+
+  setTimeout(() => {
+    isSyncing = false;
+  }, 500);
+});
+
+socket.on("seek", (time) => {
+  if (isYouTube) return;
+
+  isSyncing = true;
+
+  video.currentTime = time;
+
+  setTimeout(() => {
+    isSyncing = false;
+  }, 500);
+});
 // 💬 CHAT
 function sendMessage() {
   const input = document.getElementById("messageInput");
